@@ -280,14 +280,21 @@ def criar_cliente(clientes):
 
     cliente = PessoaFisica(nome=nome, data_nascimento=data_nascimento, cpf=cpf, endereco=endereco)
 
-    clientes.append(cliente)
+    clientes.append({"nome": nome, "data_nascimento": data_nascimento, "cpf": cpf, "endereco": endereco})
 
     print("\n=== Cliente criado com sucesso! ===")
 
+def filtrar_cliente(cpf, clientes):
+    clientes_filtrados = [cliente for cliente in clientes if cliente["cpf"] == cpf]
+    return clientes_filtrados[0] if clientes_filtrados else None
 
-def criar_conta(numero_conta, clientes, contas):
+def criar_conta(agencia, numero_conta, clientes, contas):
     cpf = input("Informe o CPF do cliente: ")
     cliente = filtrar_cliente(cpf, clientes)
+
+    if cliente:
+        print("\n Conta criada com sucesso!")
+        return {"agencia": agencia, "numero_conta": numero_conta, "cliente": cliente}
 
     if not cliente:
         print("\n@@@ Cliente não encontrado, fluxo de criação de conta encerrado! @@@")
@@ -302,13 +309,26 @@ def criar_conta(numero_conta, clientes, contas):
 
 def listar_contas(contas):
     for conta in contas:
+        linha = f"""\
+        Agencia:\t{conta['agencia']}
+        C/C:\t\t{conta['numero_conta']}
+        Titular:\t{conta['cliente']['nome']}
+        """
         print("=" * 100)
-        print(textwrap.dedent(str(conta)))
+        print(textwrap.dedent(linha))
 
 
 def main():
+    LIMITE_SAQUES = 3
+    AGENCIA = "0001"
+
+    saldo = 0
+    limite = 500
+    extrato = ""
+    numero_saques = 0
     clientes = []
     contas = []
+    
 
     while True:
         opcao = menu()
@@ -327,7 +347,10 @@ def main():
 
         elif opcao == "nc":
             numero_conta = len(contas) + 1
-            criar_conta(numero_conta, clientes, contas)
+            conta = criar_conta(AGENCIA, numero_conta, clientes)
+
+            if conta:
+                contas.append(conta)
 
         elif opcao == "lc":
             listar_contas(contas)
